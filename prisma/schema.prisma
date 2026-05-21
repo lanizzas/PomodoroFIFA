@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String?
+  name              String?
+  clubName          String    @default("My Club")
+  managerName       String    @default("Manager")
+  division          Int       @default(5)
+  managerReputation Int       @default(0)
+  totalSeasons      Int       @default(0)
+  transferBudget    Int       @default(1000)
+  createdAt         DateTime  @default(now())
+
+  skills   Skill[]
+  sessions Session[]
+  seasons  Season[]
+}
+
+model Skill {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  emoji         String   @default("⚽")
+  ovr           Int      @default(55)
+  pace          Int      @default(55)
+  stamina       Int      @default(55)
+  vision        Int      @default(55)
+  composure     Int      @default(55)
+  technique     Int      @default(55)
+  morale        String   @default("good")
+  form          String   @default("[]")
+  xp            Int      @default(0)
+  fatigue       Int      @default(0)
+  totalSessions Int      @default(0)
+  totalWins     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  skillId      String
+  duration     Int
+  goal         String
+  goalHit      Boolean  @default(false)
+  focusScore   Int      @default(3)
+  result       String   @default("draw")
+  ovrBefore    Int
+  ovrAfter     Int
+  xpEarned     Int      @default(0)
+  budgetEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+
+model Season {
+  id           String    @id @default(cuid())
+  userId       String
+  seasonNumber Int
+  division     Int
+  wins         Int       @default(0)
+  draws        Int       @default(0)
+  losses       Int       @default(0)
+  points       Int       @default(0)
+  budgetEarned Int       @default(0)
+  promoted     Boolean?
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
