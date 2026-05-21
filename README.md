@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Career Mode
 
-## Getting Started
+Gamify your deep work with FIFA Manager Career Mode mechanics. Every Pomodoro session is a match. Every skill you practice is a player on your squad.
 
-First, run the development server:
+## Deploy in ~5 minutes (free)
+
+### 1. Create a free Neon database
+
+1. Go to [neon.tech](https://neon.tech) and create a free account
+2. Create a new project (any name, choose the region closest to you)
+3. Copy the **Connection string** — it looks like:
+   ```
+   postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+   ```
+
+### 2. Push the database schema
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+DATABASE_URL="your-neon-connection-string" npx prisma migrate dev --name init
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Deploy to Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Push this project to a GitHub repo
+2. Go to [vercel.com](https://vercel.com) → **New Project** → import your repo
+3. Add these environment variables in the Vercel dashboard:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | Your Neon connection string |
+| `NEXTAUTH_SECRET` | Run `openssl rand -base64 32` to generate one |
+| `NEXTAUTH_URL` | Your Vercel URL, e.g. `https://career-mode.vercel.app` |
 
-## Learn More
+4. Click **Deploy**
 
-To learn more about Next.js, take a look at the following resources:
+Visit your Vercel URL, create an account, and start playing.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Run locally
 
-## Deploy on Vercel
+```bash
+npm install
+cp .env.example .env
+# Fill in DATABASE_URL and NEXTAUTH_SECRET in .env
+npx prisma migrate dev --name init
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Tech stack
+
+| | |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Database | PostgreSQL via Neon (serverless) |
+| ORM | Prisma 7 |
+| Auth | NextAuth.js v5 — JWT sessions, email + password |
+| Hosting | Vercel |
