@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = await getSession();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const now = new Date();
   const seasonStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const current = await prisma.season.findFirst({
-    where: { userId: session.user.id, startDate: { gte: seasonStart } },
+    where: { userId, startDate: { gte: seasonStart } },
   });
-
   const history = await prisma.season.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     orderBy: { seasonNumber: "desc" },
     take: 10,
   });

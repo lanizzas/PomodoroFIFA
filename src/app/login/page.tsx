@@ -1,6 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -16,47 +15,32 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSignIn(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (result?.error) {
-      setError("Invalid email or password.");
-    } else {
-      router.push("/dashboard");
-    }
-  }
 
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    const res = await fetch("/api/auth/signup", {
+    const url = mode === "signin" ? "/api/auth/login" : "/api/auth/signup";
+    const body = mode === "signin"
+      ? { email, password }
+      : { email, password, clubName, managerName };
+
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, clubName, managerName }),
+      body: JSON.stringify(body),
     });
+
     const data = await res.json();
+    setLoading(false);
+
     if (!res.ok) {
       setError(data.error ?? "Something went wrong.");
-      setLoading(false);
       return;
     }
-    // Auto sign in after signup
-    const result = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
-    if (result?.error) {
-      setError("Account created. Please sign in.");
-      setMode("signin");
-    } else {
-      router.push("/dashboard");
-    }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -68,7 +52,6 @@ export default function LoginPage() {
           <p className="text-gray-400 mt-1 text-sm">Your deep work. Your legacy.</p>
         </div>
 
-        {/* Mode toggle */}
         <div className="flex bg-[#13161f] rounded-xl p-1 mb-6">
           {(["signin", "signup"] as Mode[]).map((m) => (
             <button
@@ -83,13 +66,11 @@ export default function LoginPage() {
           ))}
         </div>
 
-        <form onSubmit={mode === "signin" ? handleSignIn : handleSignUp} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Email</label>
             <input
-              type="email"
-              required
-              value={email}
+              type="email" required value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               className="w-full bg-[#13161f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -98,9 +79,7 @@ export default function LoginPage() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">Password</label>
             <input
-              type="password"
-              required
-              value={password}
+              type="password" required value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === "signup" ? "At least 6 characters" : "••••••••"}
               className="w-full bg-[#13161f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -112,8 +91,7 @@ export default function LoginPage() {
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Club name</label>
                 <input
-                  type="text"
-                  value={clubName}
+                  type="text" value={clubName}
                   onChange={(e) => setClubName(e.target.value)}
                   placeholder="e.g. Deep Work FC"
                   className="w-full bg-[#13161f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -122,8 +100,7 @@ export default function LoginPage() {
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Your name</label>
                 <input
-                  type="text"
-                  value={managerName}
+                  type="text" value={managerName}
                   onChange={(e) => setManagerName(e.target.value)}
                   placeholder="Manager name"
                   className="w-full bg-[#13161f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -139,13 +116,10 @@ export default function LoginPage() {
           )}
 
           <button
-            type="submit"
-            disabled={loading}
+            type="submit" disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors mt-2"
           >
-            {loading
-              ? mode === "signin" ? "Signing in..." : "Creating account..."
-              : mode === "signin" ? "Sign In" : "Create Account & Start Playing"}
+            {loading ? "Loading..." : mode === "signin" ? "Sign In" : "Create Account & Start Playing"}
           </button>
         </form>
       </div>

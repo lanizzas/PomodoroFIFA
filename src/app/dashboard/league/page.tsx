@@ -1,4 +1,5 @@
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DIVISION_NAMES } from "@/lib/game-logic";
 
@@ -19,8 +20,8 @@ function seedRandom(seed: number) {
 }
 
 export default async function LeaguePage() {
-  const session = await auth();
-  const userId = session!.user!.id!;
+  const userId = await getSession();
+  if (!userId) redirect("/login");
 
   const now = new Date();
   const seasonStart = new Date(now.getFullYear(), now.getMonth(), 1);

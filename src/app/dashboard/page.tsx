@@ -1,11 +1,12 @@
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { DIVISION_NAMES, MORALE_COLORS, type Morale } from "@/lib/game-logic";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  const userId = session!.user!.id!;
+  const userId = await getSession();
+  if (!userId) redirect("/login");
 
   const [user, skills, recentSessions] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),

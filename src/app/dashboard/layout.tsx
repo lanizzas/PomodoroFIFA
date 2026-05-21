@@ -1,10 +1,10 @@
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import NavBar from "@/components/NavBar";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+  const userId = await getSession();
+  if (!userId) redirect("/login");
 
   return (
     <div className="min-h-screen flex flex-col">
